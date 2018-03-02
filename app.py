@@ -100,26 +100,50 @@ def generateIssueMsg(data):
     elif action == 'close':
         msg = '*{0} Issue closed by {1}*\n'\
             .format(data['project']['name'], data['user']['name'])
-    msg = msg + '*{0}*'.format(data['object_attributes']['title'])
-    msg = msg + 'see {0} for further details'.format(data['object_attributes']['url'])
+    msg = msg + '*{0}*\n'.format(data['object_attributes']['title'])
+    msg = msg + 'see [URL]({0}) for further details'.format(data['object_attributes']['url'])
     return msg
 
 
 def generateCommentMsg(data):
     ntype = data['object_attributes']['noteable_type']
+    return generateNoteMsgByType(ntype, data)
+
+def generateNoteMsgByType(ntype, data):
+    ntypeMsg = 'Note'
     if ntype == 'Commit':
-        msg = 'note to commit'
+        ntypeMsg = 'Note to Commit'
     elif ntype == 'MergeRequest':
-        msg = 'note to MergeRequest'
+        ntypeMsg = 'Note to MergeRequest'
     elif ntype == 'Issue':
-        msg = 'note to Issue'
+        ntypeMsg = 'Note to Issue'
     elif ntype == 'Snippet':
-        msg = 'note on code snippet'
+        ntypeMsg = 'Note on Code snippet'
+    msg = '*{0} new {2} from {1} to {3}*\n' \
+        .format(data['project']['name'], data['user']['name'], ntypeMsg, data['object_attributes']['assignee']['name'])
+    msg = msg + '*{0}*\n'.format(data['object_attributes']['note'])
+    msg = msg + 'see [URL]({0}) for further details'.format(data['object_attributes']['url'])
     return msg
 
 
 def generateMergeRequestMsg(data):
-    return 'new MergeRequest'
+    action = data['object_attributes']['state']
+    last_commit = data['object_attributes']['last_commit']
+    if action == 'opened':
+        msg = '*{0} new Merge Request from {1}*\n' \
+            .format(data['project']['name'], last_commit['author']['name'])
+    elif action == 'updated':
+        msg = '*{0} Merge Request updated by {1}*\n' \
+            .format(data['project']['name'], last_commit['author']['name'])
+    elif action == 'merged':
+        msg = '*{0} Merge Request merged by {1}*\n' \
+            .format(data['project']['name'], last_commit['author']['name'])
+    elif action == 'closed':
+        msg = '*{0} Merge Request closed by {1}*\n' \
+            .format(data['project']['name'], last_commit['author']['name'])
+    msg = msg + '*{0}*\n'.format(data['object_attributes']['title'])
+    msg = msg + 'see [{0}]({1}) for further details'.format(data['object_attributes']['title'], data['object_attributes']['url'])
+    return msg
 
 
 def generateWikiMsg(data):
