@@ -1,10 +1,13 @@
 #!/usr/bin/env python3
 
 import json
+import argparse
+
 from flask import Flask
 from flask import request
 from flask import jsonify
 from bot import Bot
+
 app = Flask(__name__)
 
 class GitlabBot(Bot):
@@ -132,5 +135,10 @@ def generateBuildMsg(data):
 
 
 if __name__ == "__main__":
+    parser = argparse.ArgumentParser()
+    parser.add_argument('--port', type=int, help='listening port', default=11011)
+    parser.add_argument('--interface', metavar='i', type=str, help='listening iface', default='0.0.0.0')
+    args = parser.parse_args()
+
     b.run_threaded()
-    app.run(host='0.0.0.0', port=10111)
+    app.run(host=args.interface, port=args.port)
